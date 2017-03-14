@@ -10,9 +10,9 @@ public class BeaconValue implements Serializable {
 
     private String minor;
 
-    private String distance;
+    private double distance;
 
-    private String rssi;
+    private int rssi;
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -26,11 +26,11 @@ public class BeaconValue implements Serializable {
         this.minor = minor;
     }
 
-    public void setDistance(String distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    public void setRssi(String rssi) {
+    public void setRssi(int rssi) {
         this.rssi = rssi;
     }
 
@@ -46,11 +46,11 @@ public class BeaconValue implements Serializable {
         return this.minor;
     }
 
-    public String getDistance() {
+    public double getDistance() {
         return this.distance;
     }
 
-    public String getRssi() {
+    public int getRssi() {
         return this.rssi;
     }
 }
