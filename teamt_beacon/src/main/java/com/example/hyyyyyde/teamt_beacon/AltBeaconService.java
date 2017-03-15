@@ -2,6 +2,8 @@ package com.example.hyyyyyde.teamt_beacon;
 
 
 import android.app.Service;
+import android.bluetooth.le.AdvertiseCallback;
+import android.bluetooth.le.AdvertiseSettings;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -13,6 +15,7 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.BeaconTransmitter;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
@@ -26,11 +29,17 @@ public class AltBeaconService extends Service implements BeaconConsumer {
     // ログ出力時のタグ
     private static final String TAG = "AltBeaconService";
 
+    // iBeacon領域監視マネージャ
     private BeaconManager beaconManager;
 
-    private String beaconUuid;
-    private Integer beaconMajor;
-    private Integer beaconMinor;
+    // iBeaconトランスミッタ
+    private BeaconTransmitter beaconTransmitter;
+
+    // iBeacon送信用データ
+    private BeaconValue sendBeaconValue;
+
+    // iBeacon領域監視データ
+    private BeaconValue regionBeaconValue;
 
     private final IBinder binderBinder = new AltBeaconBinder();
 
@@ -82,10 +91,40 @@ public class AltBeaconService extends Service implements BeaconConsumer {
         }
     }
 
-    public void startBeacon(String uuid, Integer major, Integer minor) {
-        beaconUuid = uuid;
-        beaconMajor = major;
-        beaconMinor = minor;
+    public void startBeacon(BeaconValue send, BeaconValue region) {
+        sendBeaconValue = send;
+        regionBeaconValue = region;
+
+        transmitter();
+        receiver();
+    }
+
+    private void transmitter() {
+        Beacon beacon = new Beacon.Builder()
+                .setId1(sendBeaconValue.getUuid())
+                .setId2(sendBeaconValue.getMajor())
+                .setId3(sendBeaconValue.getMinor())
+                .build();
+        BeaconParser beaconParser = new BeaconParser()
+                .setBeaconLayout(IBEACON_FORMAT);
+        beaconTransmitter = new BeaconTransmitter(this, beaconParser);
+        beaconTransmitter.startAdvertising(beacon, new AdvertiseCallback() {
+
+            @Override
+            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                Log.d(TAG, "onStartSuccess");
+                super.onStartSuccess(settingsInEffect);
+            }
+
+            @Override
+            public void onStartFailure(int errorCode) {
+                Log.d(TAG, "onStartFailure");
+                super.onStartFailure(errorCode);
+            }
+        });
+    }
+
+    private void receiver() {
         beaconManager.removeAllMonitorNotifiers();
         beaconManager.removeAllRangeNotifiers();
         beaconManager.setForegroundBetweenScanPeriod(5000);
@@ -101,6 +140,9 @@ public class AltBeaconService extends Service implements BeaconConsumer {
         Log.d(TAG, "stopBeacon");
         if (beaconManager.isBound(this)) {
             beaconManager.unbind(this);
+        }
+        if (beaconTransmitter.isStarted()) {
+            beaconTransmitter.stopAdvertising();
         }
     }
 
@@ -167,6 +209,7 @@ public class AltBeaconService extends Service implements BeaconConsumer {
                 }
             }
         });
+
     }
 
     @Override
@@ -185,6 +228,9 @@ public class AltBeaconService extends Service implements BeaconConsumer {
             beaconManager.removeAllRangeNotifiers();
             beaconManager.unbind(this);
         }
+        if (beaconTransmitter.isStarted()) {
+            beaconTransmitter.stopAdvertising();
+        }
     }
 
     @Override
@@ -193,7 +239,7 @@ public class AltBeaconService extends Service implements BeaconConsumer {
     }
 
     @Nullable
-    private Identifier generateBeaconMajor() {
+    private Identifier generateBeaconMajor(String beaconMajor) {
         if (beaconMajor != null) {
             return Identifier.parse(String.valueOf(beaconMajor));
         }
@@ -201,9 +247,17 @@ public class AltBeaconService extends Service implements BeaconConsumer {
     }
 
     @Nullable
-    private Identifier generateBeaconMinor() {
+    private Identifier generateBeaconMinor(String beaconMinor) {
         if (beaconMinor != null) {
             return Identifier.parse(String.valueOf(beaconMinor));
+        }
+        return null;
+    }
+
+    @Nullable
+    private Identifier generateBeaconUuid(String beaconUuid) {
+        if (beaconUuid != null) {
+            return Identifier.parse(String.valueOf(beaconUuid));
         }
         return null;
     }
@@ -214,6 +268,9 @@ public class AltBeaconService extends Service implements BeaconConsumer {
      * @return Region
      */
     private Region generateRegion() {
-        return new Region("teamT-beacon", null, generateBeaconMajor(), generateBeaconMinor());
+        return new Region("teamT-beacon",
+                generateBeaconUuid(regionBeaconValue.getUuid()),
+                generateBeaconMajor(regionBeaconValue.getMajor()),
+                generateBeaconMinor(regionBeaconValue.getMinor()));
     }
 }

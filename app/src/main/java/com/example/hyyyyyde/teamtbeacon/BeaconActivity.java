@@ -18,11 +18,6 @@ public class BeaconActivity extends AppCompatActivity {
 
     private static final String TAG = "BeaconActivity";
 
-    private String uuid = "123456789";
-
-    private Integer major = null;
-    private Integer minor = null;
-
     private AltBeaconService mBeacon;
 
     private boolean serviceConnected = false;
@@ -49,7 +44,15 @@ public class BeaconActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (serviceConnected) {
-                    mBeacon.startBeacon(uuid, major, minor);
+                    BeaconValue regionBeacon = new BeaconValue()
+                            .setUuid(null)
+                            .setMajor(null)
+                            .setMinor(null);
+                    BeaconValue sendBeacon = new BeaconValue()
+                            .setUuid("1234")
+                            .setMajor("1")
+                            .setMinor("0");
+                    mBeacon.startBeacon(sendBeacon, regionBeacon);
                 }
             }
         });

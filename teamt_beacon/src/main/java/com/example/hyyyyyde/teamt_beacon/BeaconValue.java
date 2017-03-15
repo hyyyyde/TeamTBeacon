@@ -14,24 +14,29 @@ public class BeaconValue implements Serializable {
 
     private int rssi;
 
-    public void setUuid(String uuid) {
+    public BeaconValue setUuid(String uuid) {
         this.uuid = uuid;
+        return this;
     }
 
-    public void setMajor(String major) {
+    public BeaconValue setMajor(String major) {
         this.major = major;
+        return this;
     }
 
-    public void setMinor(String minor) {
+    public BeaconValue setMinor(String minor) {
         this.minor = minor;
+        return this;
     }
 
-    public void setDistance(double distance) {
+    public BeaconValue setDistance(double distance) {
         this.distance = distance;
+        return this;
     }
 
-    public void setRssi(int rssi) {
+    public BeaconValue setRssi(int rssi) {
         this.rssi = rssi;
+        return this;
     }
 
     public String getUuid() {
