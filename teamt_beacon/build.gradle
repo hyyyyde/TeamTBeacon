@@ -9,7 +9,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -31,7 +31,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:appcompat-v7:25.3.0'
     testCompile 'junit:junit:4.12'
     compile 'org.altbeacon:android-beacon-library:2+'
 }
@@ -41,7 +41,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '1.0.0'                   // version
+            pom.version = '1.0.1'                   // version
             pom.groupId = 'com.example.hyyyyde'     // グループ名
             pom.artifactId = 'teamt_beacon'         // ライブラリ名
         }
