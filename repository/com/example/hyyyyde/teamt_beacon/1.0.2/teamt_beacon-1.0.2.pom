@@ -4,13 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example.hyyyyde</groupId>
   <artifactId>teamt_beacon</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>aar</packaging>
   <dependencies>
     <dependency>
       <groupId>com.android.support</groupId>
       <artifactId>appcompat-v7</artifactId>
-      <version>25.2.0</version>
+      <version>25.3.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

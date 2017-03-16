@@ -55,7 +55,7 @@ public class AltBeaconService extends Service implements BeaconConsumer {
     /**
      * オブザーバーリスト
      */
-    private CopyOnWriteArrayList<BeaconEventObserver> observers = new CopyOnWriteArrayList<BeaconEventObserver>();
+    private CopyOnWriteArrayList<BeaconEventObserver> observers = new CopyOnWriteArrayList<>();
 
     /**
      * オブザーバーの取得
@@ -84,56 +84,12 @@ public class AltBeaconService extends Service implements BeaconConsumer {
         observers.remove(observer);
     }
 
-    private void notifyObserver(BeaconValue beaconValue) {
-        CopyOnWriteArrayList<BeaconEventObserver> observers = getObservers();
-        for (BeaconEventObserver observer : observers) {
-            observer.onNotify(beaconValue);
-        }
-    }
-
     public void startBeacon(BeaconValue send, BeaconValue region) {
         sendBeaconValue = send;
         regionBeaconValue = region;
 
         transmitter();
         receiver();
-    }
-
-    private void transmitter() {
-        Beacon beacon = new Beacon.Builder()
-                .setId1(sendBeaconValue.getUuid())
-                .setId2(sendBeaconValue.getMajor())
-                .setId3(sendBeaconValue.getMinor())
-                .build();
-        BeaconParser beaconParser = new BeaconParser()
-                .setBeaconLayout(IBEACON_FORMAT);
-        beaconTransmitter = new BeaconTransmitter(this, beaconParser);
-        beaconTransmitter.startAdvertising(beacon, new AdvertiseCallback() {
-
-            @Override
-            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                Log.d(TAG, "onStartSuccess");
-                super.onStartSuccess(settingsInEffect);
-            }
-
-            @Override
-            public void onStartFailure(int errorCode) {
-                Log.d(TAG, "onStartFailure");
-                super.onStartFailure(errorCode);
-            }
-        });
-    }
-
-    private void receiver() {
-        beaconManager.removeAllMonitorNotifiers();
-        beaconManager.removeAllRangeNotifiers();
-        beaconManager.setForegroundBetweenScanPeriod(5000);
-        beaconManager.setForegroundScanPeriod(3000);
-
-        // BeaconのフォーマットはiBeacon限定
-        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
-
-        beaconManager.bind(this);
     }
 
     public void stopBeacon() {
@@ -195,7 +151,6 @@ public class AltBeaconService extends Service implements BeaconConsumer {
         beaconManager.addRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> collection, Region region) {
-                Log.d(TAG, "RangeBeaconsInRegion");
                 if (collection.size() > 0) {
                     for (Beacon beacon : collection) {
                         BeaconValue beaconValue = new BeaconValue();
@@ -204,12 +159,13 @@ public class AltBeaconService extends Service implements BeaconConsumer {
                         beaconValue.setMinor(beacon.getId3().toString());
                         beaconValue.setDistance(beacon.getDistance());
                         beaconValue.setRssi(beacon.getRssi());
+                        beaconValue.setConnected(true);
+
                         notifyObserver(beaconValue);
                     }
                 }
             }
         });
-
     }
 
     @Override
@@ -223,6 +179,12 @@ public class AltBeaconService extends Service implements BeaconConsumer {
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         super.onDestroy();
+
+        CopyOnWriteArrayList<BeaconEventObserver> observers = getObservers();
+        for (BeaconEventObserver observer : observers) {
+            deleteObserver(observer);
+        }
+
         if (beaconManager.isBound(this)) {
             beaconManager.removeAllMonitorNotifiers();
             beaconManager.removeAllRangeNotifiers();
@@ -272,5 +234,50 @@ public class AltBeaconService extends Service implements BeaconConsumer {
                 generateBeaconUuid(regionBeaconValue.getUuid()),
                 generateBeaconMajor(regionBeaconValue.getMajor()),
                 generateBeaconMinor(regionBeaconValue.getMinor()));
+    }
+
+    private void notifyObserver(BeaconValue beaconValue) {
+        CopyOnWriteArrayList<BeaconEventObserver> observers = getObservers();
+        for (BeaconEventObserver observer : observers) {
+            observer.onNotify(beaconValue);
+        }
+    }
+
+    private void transmitter() {
+        Beacon beacon = new Beacon.Builder()
+                .setId1(sendBeaconValue.getUuid())
+                .setId2(sendBeaconValue.getMajor())
+                .setId3(sendBeaconValue.getMinor())
+                .build();
+        BeaconParser beaconParser = new BeaconParser()
+                .setBeaconLayout(IBEACON_FORMAT);
+        beaconTransmitter = new BeaconTransmitter(this, beaconParser);
+
+        beaconTransmitter.startAdvertising(beacon, new AdvertiseCallback() {
+
+            @Override
+            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                Log.d(TAG, "onStartSuccess");
+                super.onStartSuccess(settingsInEffect);
+            }
+
+            @Override
+            public void onStartFailure(int errorCode) {
+                Log.d(TAG, "onStartFailure");
+                super.onStartFailure(errorCode);
+            }
+        });
+    }
+
+    private void receiver() {
+        beaconManager.removeAllMonitorNotifiers();
+        beaconManager.removeAllRangeNotifiers();
+//        beaconManager.setForegroundBetweenScanPeriod(5000);
+//        beaconManager.setForegroundScanPeriod(3000);
+
+        // BeaconのフォーマットはiBeacon限定
+        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_FORMAT));
+
+        beaconManager.bind(this);
     }
 }

@@ -14,6 +14,8 @@ import com.example.hyyyyyde.teamt_beacon.AltBeaconService;
 import com.example.hyyyyyde.teamt_beacon.BeaconEventObserver;
 import com.example.hyyyyyde.teamt_beacon.BeaconValue;
 
+import java.util.UUID;
+
 public class BeaconActivity extends AppCompatActivity {
 
     private static final String TAG = "BeaconActivity";
@@ -29,7 +31,8 @@ public class BeaconActivity extends AppCompatActivity {
                     + " major:" + beaconValue.getMajor()
                     + " minor:" + beaconValue.getMinor()
                     + " distance:" + beaconValue.getDistance()
-                    + " rssi:" + beaconValue.getRssi());
+                    + " rssi:" + beaconValue.getRssi()
+                    + " connected:" + beaconValue.getConnected());
         }
     };
 
@@ -44,12 +47,16 @@ public class BeaconActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (serviceConnected) {
+                    String uuid = UUID.randomUUID().toString();
+
+//                    String regionUuid = "00000000-0000-0000-0000-000000000000";
+                    String regionUuid = null;
                     BeaconValue regionBeacon = new BeaconValue()
-                            .setUuid(null)
+                            .setUuid(regionUuid)
                             .setMajor(null)
                             .setMinor(null);
                     BeaconValue sendBeacon = new BeaconValue()
-                            .setUuid("1234")
+                            .setUuid(uuid)
                             .setMajor("1")
                             .setMinor("0");
                     mBeacon.startBeacon(sendBeacon, regionBeacon);
