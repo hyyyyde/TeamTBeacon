@@ -9,7 +9,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.3"
+        versionName "1.0.4"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -41,7 +41,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository url: "file://${repo.absolutePath}"
-            pom.version = '1.0.3'                   // version
+            pom.version = '1.0.4'                   // version
             pom.groupId = 'com.example.hyyyyde'     // グループ名
             pom.artifactId = 'teamt_beacon'         // ライブラリ名
         }

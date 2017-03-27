@@ -159,6 +159,7 @@ public class AltBeaconService extends Service implements BeaconConsumer {
                         beaconValue.setMinor(beacon.getId3().toString());
                         beaconValue.setDistance(beacon.getDistance());
                         beaconValue.setRssi(beacon.getRssi());
+                        beaconValue.setTxPower(beacon.getTxPower());
                         beaconValue.setConnected(true);
 
                         notifyObserver(beaconValue);
@@ -253,20 +254,7 @@ public class AltBeaconService extends Service implements BeaconConsumer {
                 .setBeaconLayout(IBEACON_FORMAT);
         beaconTransmitter = new BeaconTransmitter(this, beaconParser);
 
-        beaconTransmitter.startAdvertising(beacon, new AdvertiseCallback() {
-
-            @Override
-            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                Log.d(TAG, "onStartSuccess");
-                super.onStartSuccess(settingsInEffect);
-            }
-
-            @Override
-            public void onStartFailure(int errorCode) {
-                Log.d(TAG, "onStartFailure");
-                super.onStartFailure(errorCode);
-            }
-        });
+        beaconTransmitter.startAdvertising(beacon);
     }
 
     private void receiver() {

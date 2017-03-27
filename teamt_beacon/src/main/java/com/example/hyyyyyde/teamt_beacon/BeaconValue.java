@@ -14,6 +14,8 @@ public class BeaconValue implements Serializable {
 
     private int rssi;
 
+    private int txPower;
+
     private boolean connected;
 
     public BeaconValue setUuid(String uuid) {
@@ -46,6 +48,11 @@ public class BeaconValue implements Serializable {
         return this;
     }
 
+    public BeaconValue setTxPower(int txPower) {
+        this.txPower = txPower;
+        return this;
+    }
+
     public String getUuid() {
         return this.uuid;
     }
@@ -64,6 +71,10 @@ public class BeaconValue implements Serializable {
 
     public int getRssi() {
         return this.rssi;
+    }
+
+    public int getTxPower() {
+        return this.txPower;
     }
 
     public boolean getConnected() {
